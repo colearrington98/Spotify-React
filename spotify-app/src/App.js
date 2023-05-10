@@ -1,5 +1,6 @@
 import React from 'react';
 import Search from './components/Search';
+import Playlist from './components/Playlist';
 import './App.css';
 
 function App() {
@@ -8,5 +9,6 @@ function App() {
       <Search />
     </div>
   );
+
 }
 export default App;
