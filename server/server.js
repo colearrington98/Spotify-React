@@ -28,6 +28,7 @@ app.get('*', (req, res) => {
       return res.status(500).send('Oops, something went wrong!');
     }
 
+    // We want to replace the div with id "root" with the generated appMarkup
     return res.send(data.replace('<div id="root"></div>', `<div id="root">${appMarkup}</div>`));
   });
 });
