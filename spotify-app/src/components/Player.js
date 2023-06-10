@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import spotifyApi from '../spotify';
+import styles from './Player.module.css';
 
 function Player() {
   const [player, setPlayer] = useState(null);
@@ -9,40 +10,30 @@ function Player() {
   const [trackDuration, setTrackDuration] = useState(0);
 
   useEffect(() => {
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const token = spotifyApi.getAccessToken();
-      const player = new window.Spotify.Player({
-        name: 'Spotify Web Player',
-        getOAuthToken: (cb) => {
-          cb(token);
-        },
-        volume: 0.5,
-      });
+    const initializePlayer = async () => {
+      try {
+        await spotifyApi.initPlayer();
 
-      // Disconnect the previous player before initializing a new one with the updated access token
-      if (player._options.id !== null) {
-        player.disconnect();
+        const playerInstance = spotifyApi.getPlayer();
+        setPlayer(playerInstance);
+
+        playerInstance.addListener('player_state_changed', (state) => {
+          setPlayerState(state);
+          setTrack(state.track_window.current_track);
+          setTrackDuration(state.duration);
+          setTrackProgress(state.position);
+        });
+
+        playerInstance.addListener('ready', ({ device_id }) => {
+          spotifyApi.setPlayerDevice(device_id);
+        });
+      } catch (error) {
+        console.log('Error occurred while initializing player:', error);
       }
-
-      setPlayer(player);
-      player.connect();
     };
-  }, [spotifyApi.getAccessToken()]);
 
-  useEffect(() => {
-    if (!player) return;
-
-    player.addListener('player_state_changed', (state) => {
-      setPlayerState(state);
-      setTrack(state.track_window.current_track);
-      setTrackDuration(state.duration);
-      setTrackProgress(state.position);
-    });
-
-    return () => {
-      player.removeListener('player_state_changed');
-    };
-  }, [player]);
+    initializePlayer();
+  }, []);
 
   const handlePlay = () => {
     player.resume();
@@ -67,24 +58,46 @@ function Player() {
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       {track && (
-        <div>
-          <h1>{track.name}</h1>
-          <img src={track.album.images[0].url} alt={track.name} />
-          <p>{track.artists[0].name}</p>
-          <p>{track.album.name}</p>
-          <p>{trackProgress}</p>
-          <p>{trackDuration}</p>
-          <button onClick={handlePrev}>Prev</button>
-          <button onClick={handlePlay}>Play</button>
-          <button onClick={handlePause}>Pause</button>
-          <button onClick={handleNext}>Next</button>
-          <input type="range" min="0" max={trackDuration || 0} value={trackProgress} onChange={handleSeek} />
+        <div className={styles.player-info}>
+          <img
+            src={track.album.images[0].url}
+            alt={track.name}
+            className={styles.player-image}
+          />
+          <div className={styles.track-info}>
+            <h1 className={styles.track-name}>{track.name}</h1>
+            <p className={styles.artist-name}>{track.artists[0].name}</p>
+            <p>{track.album.name}</p>
+          </div>
         </div>
       )}
+      <div className={styles.player-controls}>
+        <button onClick={handlePrev} className={styles.control-button}>
+          Prev
+        </button>
+        <button onClick={handlePlay} className={styles.control-button}>
+          Play
+        </button>
+        <button onClick={handlePause} className={styles.control-button}>
+          Pause
+        </button>
+        <button onClick={handleNext} className={styles.control-button}>
+          Next
+        </button>
+      </div>
+      <input
+        type="range"
+        min="0"
+        max={trackDuration}
+        value={trackProgress}
+        onChange={handleSeek}
+        className={styles.track-progress}
+      />
     </div>
   );
 }
 
 export default Player;
+

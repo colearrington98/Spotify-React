@@ -1,25 +1,37 @@
-import React, {useState, useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
 import spotifyApi from '../spotify';
+import styles from './UserProfile.module.css';
 
 function UserProfile() {
-    const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        spotifyApi.getMe().then((res) => {
-            setUser(res);
-        });
-    }, []);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await spotifyApi.getUserProfile();
+        setUser(userData);
+      } catch (error) {
+        console.log('Error occurred while fetching user profile:', error);
+      }
+    };
 
-    return (
-        <div>
-            {user && (
-                <div>
-                    <h1>{user.display_name}</h1>
-                    <img src={user.images[0].url} alt={user.display_name} />
-                </div>
-            )}
+    fetchUserData();
+  }, []);
+
+  return (
+    <div className={styles.container}>
+      {user && (
+        <div className={styles.user-profile}>
+          <img
+            src={user.image}
+            alt={user.name}
+            className={styles.user-image}
+          />
+          <h1 className={styles.user-name}>{user.name}</h1>
         </div>
-    );
+      )}
+    </div>
+  );
 }
 
 export default UserProfile;

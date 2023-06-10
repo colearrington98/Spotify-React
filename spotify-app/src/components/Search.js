@@ -1,34 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import spotifyApi from '../spotify';
+import styles from './Search.module.css';
 
-function Search () {
-    const [search, setSearch] = React.useState('');
-    const [searchResults, setSearchResults] = React.useState([]);
-    
-    const handleSearch = (e) => {
-        setSearch(e.target.value);
-    };
-    
-    const handleSearchResults = (e) => {
-        e.preventDefault();
-        spotifyApi.searchTracks(search).then((res) => {
-        setSearchResults(res.tracks.items);
-        });
-    };
-    
-    return (
-        <div>
-        <form onSubmit={handleSearchResults}>
-            <input type="text" value={search} onChange={handleSearch} />
-            <button type="submit">Search</button>
-        </form>
+function Search() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleSearch = async () => {
+    try {
+      const response = await spotifyApi.search(searchTerm);
+      setSearchResults(response);
+    } catch (error) {
+      console.log('Error occurred while searching:', error);
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className={styles.input}
+      />
+      <button onClick={handleSearch} className={styles.button}>
+        Search
+      </button>
+      {searchResults.length > 0 && (
         <ul>
-            {searchResults.map((track) => (
-            <li key={track.id}>{track.name}</li>
-            ))}
+          {searchResults.map((result) => (
+            <li key={result.id}>{result.name}</li>
+          ))}
         </ul>
-        </div>
-    );
+      )}
+    </div>
+  );
 }
 
 export default Search;
