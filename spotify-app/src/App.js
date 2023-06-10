@@ -1,21 +1,25 @@
 import React from 'react';
-import Search from './components/Search';
-import Playlist from './components/Playlist';
-import Artist from './components/Artist';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Home from './pages/Home';
+import ArtistPage from './pages/ArtistPage';
+import AlbumPage from './pages/AlbumPage';
 import UserProfile from './components/UserProfile';
-import Album from './components/Album';
+import spotifyApi from './spotify';
 import './App.css';
 
 function App() {
-    return (
-        <div className="App">
-            <UserProfile />
-            <Search />
-            <Playlist />
-            <Artist id="ARTIST_ID_HERE" />
-            <Album id="ALBUM_ID_HERE" />
-        </div>
-    );
+  return (
+    <div className="App">
+      <UserProfile />
+      <Router>
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/artist/:id" component={ArtistPage} />
+          <Route path="/album/:id" component={AlbumPage} />
+        </Switch>
+      </Router>
+    </div>
+  );
 }
 
 export default App;
