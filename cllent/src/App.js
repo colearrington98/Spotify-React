@@ -14,8 +14,8 @@ function App() {
       <Router>
         <Switch>
           <Route exact path="/" component={Home} />
-          <Route path="/artist/:id" component={ArtistPage} />
-          <Route path="/album/:id" component={AlbumPage} />
+          <Route path="/artist/:id" render={(props) => <ArtistPage {...props} spotifyApi={spotifyApi} />} />
+          <Route path="/album/:id" render={(props) => <AlbumPage {...props} spotifyApi={spotifyApi} />} />
         </Switch>
       </Router>
     </div>
@@ -23,3 +23,4 @@ function App() {
 }
 
 export default App;
+
